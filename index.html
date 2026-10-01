@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سوق العربيات | المنصة الأولى لبيع وشراء السيارات</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Cairo Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#facc15',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        },
+                        darkbg: {
+                            900: '#12151e',
+                            950: '#090a0f',
+                            card: '#161a26'
+                        }
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #090a0f;
+            color: #f8fafc;
+        }
+        .modal-active {
+            overflow: hidden;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2430;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d97706;
+        }
+        .glass-panel {
+            background: rgba(22, 26, 38, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gold-border-glow {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-darkbg-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-gold-500 selection:text-black">
+
+    <!-- Header Section -->
+    <header class="bg-darkbg-card/90 backdrop-blur-md text-white sticky top-0 z-40 shadow-2xl border-b border-gold-500/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-gold-500 to-gold-700 flex items-center justify-center shadow-lg shadow-gold-500/25 border border-amber-200/40 transform hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-car-side text-2xl text-black"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black tracking-tight block leading-none text-white">سوق <span class="gold-gradient-text">العربيات</span></span>
+                        <span class="text-[10px] text-amber-400/80 font-bold tracking-wide">دليلك الأول لبيع وشراء جميع السيارات</span>
+                    </div>
+                </div>
+
+                <!-- Global Search Bar -->
+                <div class="hidden md:flex items-center flex-1 max-w-lg mx-8">
+                    <div class="relative w-full">
+                        <input type="text" id="globalSearchInput" oninput="handleSearch()" placeholder="ابحث بالاسم، الماركة، الموديل، أو المحافظة..." 
+                            class="w-full bg-darkbg-950 text-slate-100 text-sm rounded-2xl pr-11 pl-4 py-3 border border-gold-500/20 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-all placeholder-slate-500">
+                        <i class="fa-solid fa-magnifying-glass absolute right-4 top-3.5 text-gold-500/70"></i>
+                    </div>
+                </div>
+
+                <!-- Action Controls & Auth State -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="toggleFavoritesView()" id="favToggleBtn" title="المفضلة" class="relative p-3 rounded-2xl bg-darkbg-950 hover:bg-gold-500/10 text-slate-300 hover:text-gold-400 transition-all border border-gold-500/20">
+                        <i class="fa-solid fa-heart text-lg text-rose-500"></i>
+                        <span id="favCountBadge" class="absolute -top-1.5 -right-1.5 bg-gold-500 text-black text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md hidden">0</span>
+                    </button>
+                    
+                    <button onclick="requireAuthOrExecute(openAddCarModal)" class="flex items-center gap-2 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-black font-black px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl shadow-lg shadow-gold-500/20 transition-all transform active:scale-95 text-xs sm:text-sm border border-amber-300/30">
+                        <i class="fa-solid fa-plus-circle text-base text-black"></i>
+                        <span class="hidden sm:inline">أضف سيارتك للبيع</span>
+                    </button>
+
+                    <!-- Dynamic User Account Section -->
+                    <div id="userAuthSection" class="flex items-center gap-2 border-r border-gold-500/20 pr-2 sm:pr-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile Search Bar -->
+            <div class="md:hidden pb-4">
+                <div class="relative w-full">
+                    <input type="text" id="mobileSearchInput" oninput="handleMobileSearch()" placeholder="ابحث بالاسم، الماركة، الموديل..." 
+                        class="w-full bg-darkbg-950 text-slate-100 text-sm rounded-xl pr-10 pl-4 py-2.5 border border-gold-500/20 focus:outline-none focus:border-gold-500">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-gold-500/70 text-xs"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Status Ribbon -->
+    <div id="adminRibbon" class="bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-black font-black text-xs py-2 px-4 text-center shadow-lg hidden">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <span class="flex items-center gap-2">
+                <i class="fa-solid fa-crown text-base"></i>
+                <span>أهلاً بك يا محمد (الأدمن) - نشر السيارات مباشر وبدون واتساب كـ مدير المنصة!</span>
+            </span>
+            <div class="flex gap-2">
+                <button onclick="openAdminDashboardModal()" class="bg-black text-gold-400 hover:text-white px-3 py-1 rounded-lg text-[11px] font-bold border border-gold-400 transition-all">
+                    لوحة التحكم
+                </button>
+                <button onclick="logoutAdmin()" class="bg-rose-600 text-white hover:bg-rose-700 px-3 py-1 rounded-lg text-[11px] font-bold transition-all">
+                    خروج الأدمن
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+        
+        <!-- Hero Section -->
+        <div class="relative rounded-3xl bg-darkbg-card border border-gold-500/20 p-6 sm:p-10 mb-10 overflow-hidden shadow-2xl gold-border-glow">
+            <div class="absolute -right-20 -top-20 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-gold-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 max-w-3xl mb-8">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 bg-gold-500/10 text-gold-400 rounded-full text-xs font-bold mb-4 border border-gold-500/30">
+                    <i class="fa-solid fa-crown text-gold-400"></i> جميع ماركات وموديلات العالم بجميع الفئات
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-black mb-4 leading-tight text-white">ابحث عن سيارتك أو اعرض سيارتك للبيع فوراً</h1>
+                <p class="text-slate-400 text-sm sm:text-base leading-relaxed">قم بإنشاء حسابك الاحترافي مجاناً لتتمكن من إضافة السيارات مع صور المعرض والمفضلة والتواصل المباشر مع البائعين.</p>
+            </div>
+
+            <!-- Filter Panel -->
+            <div class="glass-panel p-5 sm:p-6 rounded-2xl border border-gold-500/20 shadow-2xl relative z-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    
+                    <!-- 1. Brand Selector -->
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1.5"><i class="fa-solid fa-car text-gold-500 ml-1"></i> الماركة</label>
+                        <select id="filterBrand" onchange="onBrandFilterChange()" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-gold-500 font-semibold">
+                            <option value="">جميع الماركات العالمية (الكل)</option>
+                        </select>
+                    </div>
+
+                    <!-- 2. Dynamic Model Input Search & Select -->
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1.5"><i class="fa-solid fa-car-side text-gold-500 ml-1"></i> الموديل</label>
+                        <div class="relative">
+                            <input type="text" id="filterModelInput" onkeyup="filterModelDropdown()" onfocus="showModelDropdown()" placeholder="اختر الماركة أولاً..." disabled
+                                class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-gold-500 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-chevron-down absolute left-3 top-3.5 text-gold-500/60 text-xs pointer-events-none"></i>
+                            
+                            <div id="filterModelDropdown" class="absolute z-30 w-full mt-1 bg-darkbg-card border border-gold-500/30 rounded-xl shadow-2xl max-h-56 overflow-y-auto hidden">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Condition Filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1.5"><i class="fa-solid fa-shield-halved text-gold-500 ml-1"></i> الحالة</label>
+                        <select id="filterCondition" onchange="applyFilters()" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-gold-500">
+                            <option value="">جميع الحالات</option>
+                            <option value="جديد">جديد (زيرو)</option>
+                            <option value="مستعمل">مستعمل</option>
+                        </select>
+                    </div>
+
+                    <!-- 4. Max Price Filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1.5"><i class="fa-solid fa-money-bill-wave text-gold-500 ml-1"></i> السعر الأقصى</label>
+                        <select id="filterMaxPrice" onchange="applyFilters()" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-gold-500">
+                            <option value="">بدون حد أقصى</option>
+                            <option value="300000">حتى 300,000 ج.م</option>
+                            <option value="600000">حتى 600,000 ج.م</option>
+                            <option value="1000000">حتى 1,000,000 ج.م</option>
+                            <option value="1500000">حتى 1,500,000 ج.م</option>
+                            <option value="2500000">حتى 2,500,000 ج.م</option>
+                            <option value="5000000">حتى 5,000,000 ج.م</option>
+                            <option value="10000000">حتى 10,000,000 ج.م</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-gold-500/20 pt-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1.5"><i class="fa-solid fa-gears text-gold-500 ml-1"></i> ناقل الحركة</label>
+                        <select id="filterTransmission" onchange="applyFilters()" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-gold-500">
+                            <option value="">الكل</option>
+                            <option value="أوتوماتيك">أوتوماتيك</option>
+                            <option value="مانيوال">مانيوال</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1.5"><i class="fa-solid fa-calendar-days text-gold-500 ml-1"></i> سنة الصنع من</label>
+                        <select id="filterMinYear" onchange="applyFilters()" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-gold-500">
+                            <option value="">الكل</option>
+                            <option value="2026">2026 فأحدث</option>
+                            <option value="2023">2023 فأحدث</option>
+                            <option value="2020">2020 فأحدث</option>
+                            <option value="2015">2015 فأحدث</option>
+                            <option value="2010">2010 فأحدث</option>
+                            <option value="2000">2000 فأحدث</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button onclick="resetFilters()" class="w-full bg-darkbg-950 hover:bg-gold-500/10 text-gold-400 hover:text-gold-300 font-bold py-2.5 px-4 rounded-xl border border-gold-500/30 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-95">
+                            <i class="fa-solid fa-rotate-right text-gold-500"></i>
+                            <span>إعادة ضبط جميع الفلاتر</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+                <h2 id="sectionTitle" class="text-2xl font-black text-white">أحدث السيارات المعروضة</h2>
+                <p id="carCountText" class="text-xs sm:text-sm text-slate-400 font-semibold mt-0.5">جاري التحميل...</p>
+            </div>
+
+            <!-- Sorting Dropdown -->
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <label for="sortBy" class="text-xs font-bold text-amber-400/80 whitespace-nowrap">ترتيب حسب:</label>
+                <select id="sortBy" onchange="applyFilters()" class="bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-gold-500 w-full sm:w-auto shadow-sm">
+                    <option value="newest">الأحدث إضافة</option>
+                    <option value="priceLow">السعر: من الأقل للأعلى</option>
+                    <option value="priceHigh">السعر: من الأعلى للأقل</option>
+                    <option value="yearNew">سنة الصنع: الأحدث</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Cars Display Grid -->
+        <div id="carsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Vehicles Injected Here -->
+        </div>
+
+        <!-- Empty State Placeholder -->
+        <div id="emptyState" class="hidden text-center py-16 bg-darkbg-card/50 rounded-3xl border border-dashed border-gold-500/20 my-4">
+            <div class="w-20 h-20 bg-darkbg-950 rounded-3xl flex items-center justify-center mx-auto mb-4 text-gold-500 shadow-inner border border-gold-500/20">
+                <i class="fa-solid fa-car-burst text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">لا توجد سيارات مطابقة لخيارات البحث</h3>
+            <p class="text-slate-400 max-w-md mx-auto mb-6 text-xs sm:text-sm">جرب اختيار ماركة أو موديل آخر، أو قم بتخفيف حدود الفلترة.</p>
+            <button onclick="resetFilters()" class="bg-gradient-to-r from-gold-500 to-gold-600 text-black font-black px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-gold-500/20 text-sm">
+                إلغاء جميع الفلاتر
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal 0.B: Admin Control Dashboard Modal -->
+    <div id="adminDashboardModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden overflow-y-auto">
+        <div class="bg-darkbg-card rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-gold-500/30 p-6 sm:p-8 relative text-slate-100 my-auto animate-fade-in gold-border-glow">
+            <button onclick="closeModal('adminDashboardModal')" class="absolute top-5 left-5 text-slate-400 hover:text-gold-400 transition-all">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-gold-500/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-gold-500 text-black flex items-center justify-center font-black text-xl shadow-lg">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-white">لوحة تحكم إعلانات الأدمن</h3>
+                        <p class="text-xs text-gold-400">تحكم كامل بحذف وتعديل الإعلانات المعروضة على المنصة</p>
+                    </div>
+                </div>
+                <button onclick="logoutAdmin(); closeModal('adminDashboardModal');" class="bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 font-bold px-3.5 py-2 rounded-xl text-xs transition-all">
+                    خروج الأدمن
+                </button>
+            </div>
+
+            <div id="adminCarsListContainer" class="space-y-3">
+                <!-- Injected Admin Cars Grid -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1: Auth Popup -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden overflow-y-auto">
+        <div class="bg-darkbg-card rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-gold-500/30 p-6 sm:p-8 relative text-slate-100 my-auto animate-fade-in gold-border-glow">
+            <button onclick="closeModal('authModal')" class="absolute top-5 left-5 text-slate-400 hover:text-gold-400 transition-all z-10 w-8 h-8 rounded-full bg-darkbg-950 flex items-center justify-center border border-gold-500/20">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Tabs Header -->
+            <div class="flex border-b border-gold-500/20 mb-6">
+                <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-gold-500 text-gold-400 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                    <span>إنشاء حساب جديد</span>
+                </button>
+                <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket text-xs"></i>
+                    <span>تسجيل الدخول</span>
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4 hidden">
+                <div class="text-center mb-2">
+                    <h3 class="text-lg font-black text-white">مرحباً بعودتك!</h3>
+                    <p class="text-xs text-slate-400">سجل دخولك لإدارة سياراتك ومفضلتك والتواصل مع البائعين</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1"><i class="fa-solid fa-envelope text-gold-500 ml-1"></i> البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" required placeholder="example@domain.com" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500 transition-all">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-amber-300"><i class="fa-solid fa-lock text-gold-500 ml-1"></i> كلمة المرور</label>
+                        <a href="#" onclick="showToast('يمكنك الدخول بضغطة واحدة عبر حساب جوجل أو فيسبوك!')" class="text-[11px] font-bold text-gold-400 hover:underline">نسيت كلمة المرور؟</a>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="loginPass" required placeholder="••••••••" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl pr-4 pl-10 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                        <button type="button" onclick="togglePasswordVisibility('loginPass', 'loginEyeIcon')" class="absolute left-3 top-3 text-slate-400 hover:text-gold-400">
+                            <i id="loginEyeIcon" class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-gold-500 to-gold-600 text-black font-black py-3 rounded-xl transition-all shadow-lg shadow-gold-500/20 text-sm mt-2 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket text-black"></i>
+                    <span>دخول الحساب</span>
+                </button>
+            </form>
+
+            <!-- Registration Form -->
+            <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="space-y-4">
+                
+                <!-- Account Type Selector -->
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1.5"><i class="fa-solid fa-user-gear text-gold-500 ml-1"></i> نوع الحساب</label>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <label id="accountTypeUserLabel" class="cursor-pointer border-2 border-gold-500 bg-gold-500/10 p-3 rounded-2xl flex items-center gap-2.5 transition-all">
+                            <input type="radio" name="accountType" value="فرد" checked onchange="updateAccountTypeUI('فرد')" class="text-gold-500 focus:ring-0">
+                            <div>
+                                <span class="block text-xs font-bold text-white"><i class="fa-solid fa-user ml-1 text-gold-400"></i> فرد (خاص)</span>
+                                <span class="block text-[10px] text-slate-400">بيع وشراء شخصي</span>
+                            </div>
+                        </label>
+                        <label id="accountTypeDealerLabel" class="cursor-pointer border-2 border-gold-500/20 bg-darkbg-950 p-3 rounded-2xl flex items-center gap-2.5 transition-all">
+                            <input type="radio" name="accountType" value="معرض سيارات" onchange="updateAccountTypeUI('معرض سيارات')" class="text-gold-500 focus:ring-0">
+                            <div>
+                                <span class="block text-xs font-bold text-white"><i class="fa-solid fa-building-user ml-1 text-gold-400"></i> معرض / تاجر</span>
+                                <span class="block text-[10px] text-slate-400">إدارة أسطول سيارات</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Name Field -->
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1" id="regNameLabel"><i class="fa-solid fa-id-card text-gold-500 ml-1"></i> الاسم بالكامل</label>
+                    <input type="text" id="regName" required placeholder="مثال: محمد أحمد" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                </div>
+
+                <!-- Phone & City Field -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1"><i class="fa-solid fa-phone text-gold-500 ml-1"></i> رقم الهاتف المحمول</label>
+                        <div class="relative">
+                            <input type="tel" id="regPhone" required placeholder="010XXXXXXXX" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl pr-4 pl-12 py-2.5 text-sm focus:outline-none focus:border-gold-500 font-mono text-left" dir="ltr">
+                            <span class="absolute left-3 top-2.5 text-xs text-gold-500 font-mono font-bold">+20</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1"><i class="fa-solid fa-location-dot text-gold-500 ml-1"></i> المحافظة</label>
+                        <select id="regCity" required class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-gold-500">
+                            <option value="">اختر المحافظة</option>
+                            <option value="القاهرة">القاهرة</option>
+                            <option value="الجيزة">الجيزة</option>
+                            <option value="الإسكندرية">الإسكندرية</option>
+                            <option value="الشرقية">الشرقية</option>
+                            <option value="الدقهلية">الدقهلية</option>
+                            <option value="القليوبية">القليوبية</option>
+                            <option value="باقي المحافظات">باقي المحافظات</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1"><i class="fa-solid fa-at text-gold-500 ml-1"></i> البريد الإلكتروني</label>
+                    <input type="email" id="regEmail" required placeholder="name@domain.com" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                </div>
+
+                <!-- Password Field & Strength Bar -->
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1"><i class="fa-solid fa-key text-gold-500 ml-1"></i> كلمة المرور</label>
+                    <div class="relative">
+                        <input type="password" id="regPass" required onkeyup="checkPasswordStrength()" placeholder="8 أحرف أو أكثر..." class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl pr-4 pl-10 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                        <button type="button" onclick="togglePasswordVisibility('regPass', 'regEyeIcon')" class="absolute left-3 top-3 text-slate-400 hover:text-gold-400">
+                            <i id="regEyeIcon" class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- Password Strength Meter -->
+                    <div class="mt-2 bg-darkbg-950 p-2 rounded-lg border border-gold-500/20">
+                        <div class="flex justify-between items-center text-[11px] mb-1">
+                            <span class="text-slate-400">قوة كلمة المرور:</span>
+                            <span id="strengthText" class="font-bold text-slate-500">لم تُدخل بعد</span>
+                        </div>
+                        <div class="w-full bg-darkbg-card h-1.5 rounded-full overflow-hidden">
+                            <div id="strengthBar" class="h-full w-0 transition-all duration-300 bg-rose-500"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirm Password Field & Match Alert -->
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1"><i class="fa-solid fa-check-double text-gold-500 ml-1"></i> تأكيد كلمة المرور</label>
+                    <div class="relative">
+                        <input type="password" id="regPassConfirm" required onkeyup="validatePasswordMatch()" placeholder="إعادة كتابة كلمة المرور" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                    <span id="passMatchMessage" class="text-[11px] font-bold hidden mt-1 block"></span>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="flex items-start gap-2 pt-1">
+                    <input type="checkbox" id="termsCheck" required class="mt-1 rounded text-gold-500 bg-darkbg-950 border-gold-500/30 focus:ring-0">
+                    <label for="termsCheck" class="text-xs text-slate-400 leading-snug cursor-pointer">
+                        أوافق على <a href="#" onclick="showToast('الشروط والأحكام')" class="text-gold-400 hover:underline">شروط الاستخدام</a> و<a href="#" onclick="showToast('سياسة الخصوصية')" class="text-gold-400 hover:underline">سياسة الخصوصية</a>.
+                    </label>
+                </div>
+
+                <button type="submit" id="submitRegBtn" class="w-full bg-gradient-to-r from-gold-500 to-gold-600 text-black font-black py-3.5 rounded-xl transition-all shadow-lg shadow-gold-500/20 text-sm mt-3 flex items-center justify-center gap-2 active:scale-98">
+                    <i class="fa-solid fa-user-check text-base"></i>
+                    <span>إنشاء الحساب الآن</span>
+                </button>
+            </form>
+
+            <!-- Social OAuth Login Connectors -->
+            <div class="mt-6 pt-4 border-t border-gold-500/20">
+                <div class="relative flex py-1 items-center justify-center mb-4">
+                    <span class="text-[11px] font-bold text-amber-400/80 bg-darkbg-card px-3 z-10">أو التسجيل والربط السريع للحسابات</span>
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gold-500/20"></div></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" onclick="triggerGoogleOAuth()" class="flex items-center justify-center gap-2 bg-darkbg-950 hover:bg-gold-500/10 text-slate-100 border border-gold-500/30 rounded-xl py-2.5 px-3 text-xs font-bold transition-all shadow-sm active:scale-95">
+                        <i class="fa-brands fa-google text-rose-500 text-sm"></i>
+                        <span>حساب Google</span>
+                    </button>
+                    <button type="button" onclick="triggerFacebookOAuth()" class="flex items-center justify-center gap-2 bg-darkbg-950 hover:bg-gold-500/10 text-slate-100 border border-gold-500/30 rounded-xl py-2.5 px-3 text-xs font-bold transition-all shadow-sm active:scale-95">
+                        <i class="fa-brands fa-facebook text-blue-500 text-sm"></i>
+                        <span>حساب Facebook</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1.B: OAuth Account Chooser Modal -->
+    <div id="oauthModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden">
+        <div class="bg-darkbg-card rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-gold-500/30 text-center text-slate-100 animate-fade-in relative gold-border-glow">
+            <div id="oauthHeaderIcon" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl border">
+                <!-- Injected via JS -->
+            </div>
+            <h3 id="oauthProviderTitle" class="text-xl font-black text-white mb-2">تسجيل الدخول السريع</h3>
+            <p class="text-xs text-slate-400 mb-6">اختر الحساب للمتابعة فوراً إلى منصة سوق العربيات</p>
+
+            <div id="oauthAccountsList" class="space-y-3 mb-6">
+                <!-- Injected accounts list -->
+            </div>
+
+            <button onclick="closeModal('oauthModal')" class="w-full bg-darkbg-950 hover:bg-slate-800 text-slate-400 font-bold py-2.5 rounded-xl border border-gold-500/20 text-xs">
+                إلغاء
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 2: User Profile & Published Cars Modal -->
+    <div id="userProfileModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden overflow-y-auto">
+        <div class="bg-darkbg-card rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-gold-500/30 p-6 sm:p-8 relative text-slate-100 my-auto animate-fade-in gold-border-glow">
+            <button onclick="closeModal('userProfileModal')" class="absolute top-5 left-5 text-slate-400 hover:text-gold-400 transition-all z-10 w-8 h-8 rounded-full bg-darkbg-950 flex items-center justify-center border border-gold-500/20">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div id="userProfileModalContent">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Car Detail Modal -->
+    <div id="carDetailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden">
+        <div class="bg-darkbg-card rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gold-500/30 relative text-slate-100 animate-fade-in">
+            <button onclick="closeModal('carDetailModal')" class="absolute top-4 left-4 z-20 bg-black/80 hover:bg-black text-gold-400 w-10 h-10 rounded-full flex items-center justify-center transition-all border border-gold-500/30">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="carModalContent">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Add New Car Listing Modal -->
+    <div id="addCarModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden">
+        <div class="bg-darkbg-card rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gold-500/30 p-6 sm:p-8 relative text-slate-100">
+            <button onclick="closeModal('addCarModal')" class="absolute top-5 left-5 text-slate-400 hover:text-gold-400 transition-all">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="mb-6">
+                <div id="addModalBadge" class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold mb-2 border border-emerald-500/30">
+                    <i class="fa-brands fa-whatsapp"></i> رفع عبر الواتساب المباشر
+                </div>
+                <h3 class="text-2xl font-black text-white">أضف سيارتك للبيع في سوق العربيات</h3>
+                <p id="addModalSubtext" class="text-slate-400 text-xs sm:text-sm">أدخل التفاصيل وسيتم تحويلك تلقائياً للواتساب المباشر لنشر إعلانك لدى الإدارة.</p>
+            </div>
+
+            <form id="addCarForm" onsubmit="handleAddCarSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1">عنوان الإعلان</label>
+                    <input type="text" id="addTitle" required placeholder="مثال: تويوتا كورولا 2023 حالة ممتازة فبريكة" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">الماركة</label>
+                        <select id="addBrand" required onchange="onAddBrandChange()" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                            <option value="">اختر الماركة</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">الموديل</label>
+                        <select id="addModelSelect" required class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                            <option value="">اختر الموديل</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">السعر المطلوب (ج.م)</label>
+                        <input type="number" id="addPrice" required placeholder="مثال: 750000" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">المدينة / المحافظة</label>
+                        <input type="text" id="addCity" required placeholder="مثال: القاهرة" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">سنة الصنع</label>
+                        <input type="number" id="addYear" required min="1970" max="2027" value="2023" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">الكيلومترات (كم)</label>
+                        <input type="number" id="addKm" required placeholder="مثال: 45000" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">حالة السيارة</label>
+                        <select id="addCondition" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                            <option value="مستعمل">مستعمل</option>
+                            <option value="جديد">جديد (زيرو)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">ناقل الحركة</label>
+                        <select id="addTransmission" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                            <option value="أوتوماتيك">أوتوماتيك</option>
+                            <option value="مانيوال">مانيوال</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">شارات تمييز الإعلان</label>
+                        <select id="addBadge" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                            <option value="جديد">جديد</option>
+                            <option value="لقطة">لقطة</option>
+                            <option value="مميز">مميز</option>
+                            <option value="">بدون شارة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Image Picker -->
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1">
+                        <i class="fa-solid fa-images text-gold-500 ml-1"></i> اختر صور السيارة من الهاتف أو المعرض
+                    </label>
+                    <div class="relative border-2 border-dashed border-gold-500/30 hover:border-gold-500 rounded-2xl p-4 text-center cursor-pointer bg-darkbg-950 transition-all">
+                        <input type="file" id="carImageFiles" accept="image/*" multiple onchange="previewUploadedImages(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div class="flex flex-col items-center justify-center py-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-gold-500 mb-2"></i>
+                            <span class="text-xs font-bold text-slate-200">اضغط هنا لاختيار أو التقاط صور السيارة من الموبايل</span>
+                            <span class="text-[11px] text-slate-500 mt-1">يمكنك رفع أكثر من صورة في نفس الوقت</span>
+                        </div>
+                    </div>
+                    
+                    <div id="imagePreviewContainer" class="flex flex-wrap gap-2 mt-3 hidden"></div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1">الوصف والتفاصيل الإضافية</label>
+                    <textarea id="addDescription" rows="3" placeholder="اكتب حالة الدهان، الصيانة الأخيرة، الكماليات..." class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500"></textarea>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" id="addSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/20 text-sm flex items-center justify-center gap-2">
+                        <i id="addSubmitBtnIcon" class="fa-brands fa-whatsapp text-lg"></i>
+                        <span id="addSubmitBtnText">إرسال وإتمام النشر عبر الواتساب</span>
+                    </button>
+                    <button type="button" onclick="closeModal('addCarModal')" class="bg-darkbg-950 hover:bg-slate-800 text-slate-300 font-bold px-5 py-3 rounded-xl transition-all border border-gold-500/20 text-sm">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: Edit Car Modal -->
+    <div id="editCarModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden">
+        <div class="bg-darkbg-card rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gold-500/30 p-6 sm:p-8 relative text-slate-100 animate-fade-in gold-border-glow">
+            <button onclick="closeModal('editCarModal')" class="absolute top-5 left-5 text-slate-400 hover:text-gold-400 transition-all">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="mb-6 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gold-500 text-black font-black flex items-center justify-center">
+                    <i class="fa-solid fa-pen-to-square text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-white">تعديل بيانات الإعلان</h3>
+                    <p class="text-xs text-gold-400">قم بتحديث السعر أو التفاصيل وحفظ التغيرات مباشرة</p>
+                </div>
+            </div>
+
+            <form id="editCarForm" onsubmit="handleEditCarSubmit(event)" class="space-y-4">
+                <input type="hidden" id="editCarId">
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1">عنوان الإعلان</label>
+                    <input type="text" id="editTitle" required class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">السعر المطلوب (ج.م)</label>
+                        <input type="number" id="editPrice" required class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500 font-bold text-gold-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">المدينة / المحافظة</label>
+                        <input type="text" id="editCity" required class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">سنة الصنع</label>
+                        <input type="number" id="editYear" required min="1970" max="2027" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">الكيلومترات (كم)</label>
+                        <input type="number" id="editKm" required class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-300 mb-1">رابط صورة السيارة</label>
+                        <input type="url" id="editImage" placeholder="https://..." class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1">الوصف والتفاصيل الإضافية</label>
+                    <textarea id="editDescription" rows="3" class="w-full bg-darkbg-950 border border-gold-500/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500"></textarea>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-gold-500 to-gold-600 text-black font-black py-3 rounded-xl transition-all shadow-lg shadow-gold-500/20 text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk text-base"></i>
+                        <span>حفظ التعديلات فوراً</span>
+                    </button>
+                    <button type="button" onclick="closeModal('editCarModal')" class="bg-darkbg-950 hover:bg-slate-800 text-slate-300 font-bold px-5 py-3 rounded-xl transition-all border border-gold-500/20 text-sm">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Banner -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-darkbg-card border border-gold-500/40 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none gold-border-glow">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-gold-400 text-xl"></i>
+        <span id="toastMsg" class="text-xs sm:text-sm font-bold">تمت العملية بنجاح!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-darkbg-card text-slate-400 pt-12 pb-8 border-t border-gold-500/20 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 to-gold-600 flex items-center justify-center text-black">
+                            <i class="fa-solid fa-car-side text-lg"></i>
+                        </div>
+                        <span class="text-xl font-black text-white">سوق <span class="gold-gradient-text">العربيات</span></span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">المنصة الشاملة لبيع وشراء السيارات بمختلف الماركات والموديلات بسرعة وسهولة وتواصل مباشر.</p>
+                </div>
+                <div>
+                    <h4 class="text-gold-400 font-bold text-xs uppercase tracking-wider mb-3">أشهر الماركات</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="#" onclick="setQuickBrandFilter('تويوتا')" class="hover:text-gold-400 transition-all">تويوتا</a></li>
+                        <li><a href="#" onclick="setQuickBrandFilter('هيونداي')" class="hover:text-gold-400 transition-all">هيونداي</a></li>
+                        <li><a href="#" onclick="setQuickBrandFilter('مرسيدس')" class="hover:text-gold-400 transition-all">مرسيدس</a></li>
+                        <li><a href="#" onclick="setQuickBrandFilter('بي إم دبليو')" class="hover:text-gold-400 transition-all">بي إم دبليو</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-gold-400 font-bold text-xs uppercase tracking-wider mb-3">روابط مباشرة</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="#" onclick="resetFilters()" class="hover:text-gold-400 transition-all">جميع السيارات</a></li>
+                        <li><a href="#" onclick="requireAuthOrExecute(openAddCarModal)" class="hover:text-gold-400 transition-all">أضف سيارتك للبيع</a></li>
+                        <li><a href="#" onclick="toggleFavoritesView()" class="hover:text-gold-400 transition-all">المفضلة</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-gold-400 font-bold text-xs uppercase tracking-wider mb-3">تابعنا على شبكات التواصل</h4>
+                    <p class="text-xs text-slate-400 mb-3">تابع أحدث العروض والسيارات عبر منصاتنا الاجتماعية الرسمية:</p>
+                    <div class="flex flex-wrap gap-2 text-base">
+                        <!-- Instagram -->
+                        <a href="https://www.instagram.com/souq_cars113/?hl=en" target="_blank" rel="noopener noreferrer" title="Instagram" class="w-9 h-9 rounded-xl bg-darkbg-950 hover:bg-gradient-to-tr hover:from-amber-500 hover:via-rose-500 hover:to-purple-600 hover:text-white text-slate-300 flex items-center justify-center transition-all border border-gold-500/20"><i class="fa-brands fa-instagram"></i></a>
+                        <!-- TikTok -->
+                        <a href="https://www.tiktok.com/@souq_cars113?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" title="TikTok" class="w-9 h-9 rounded-xl bg-darkbg-950 hover:bg-black hover:text-cyan-400 text-slate-300 flex items-center justify-center transition-all border border-gold-500/20"><i class="fa-brands fa-tiktok"></i></a>
+                        <!-- Facebook -->
+                        <a href="https://web.facebook.com/profile.php?id=61595023826142" target="_blank" rel="noopener noreferrer" title="Facebook" class="w-9 h-9 rounded-xl bg-darkbg-950 hover:bg-blue-600 hover:text-white text-slate-300 flex items-center justify-center transition-all border border-gold-500/20"><i class="fa-brands fa-facebook-f"></i></a>
+                        <!-- WhatsApp -->
+                        <a href="https://wa.me/201130282613" target="_blank" rel="noopener noreferrer" title="WhatsApp" class="w-9 h-9 rounded-xl bg-darkbg-950 hover:bg-emerald-500 hover:text-black text-slate-300 flex items-center justify-center transition-all border border-gold-500/20"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gold-500/20 pt-6 text-center text-xs text-slate-500 font-semibold">
+                جميع الحقوق محفوظة &copy; 2026 سوق العربيات - المحرك الشامل لبيع وشراء السيارات.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const ADMIN_WHATSAPP_NUMBER = "201130282613";
+        const ADMIN_EMAIL = "admin@souq.com";
+        const ADMIN_PASS = "admin1234";
+        let isAdminLoggedIn = false;
+
+        const globalBrandModelsMap = {
+            "تويوتا": ["كورولا", "كامري", "يارس", "راف4", "فورتشنر", "لاند كروزر", "C-HR", "أفالون", "بلتا", "روميون", "هيلوكس", "سوبرا", "كراون", "افانزا", "برادو", "سيكويا", "هايلاندر", "أوربان كروزر", "رايز", "راش", "BZ4X"],
+            "هيونداي": ["توسان", "إلنترا CN7", "إلنترا HD", "إلنترا AD", "إلنترا MD", "أكسنت RB", "أكسنت HCI", "فرنا", "كريتا", "سانتافي", "سوناتا", "i10", "i20", "i30", "بايون", "فنيو", "كونا", "باليسيد", "ستاريا", "ماتريكس", "أتوس"],
+            "مرسيدس": ["C-Class (C180/C200/C300)", "E-Class (E200/E300/E350)", "S-Class (S450/S500)", "A-Class", "CLA", "GLC", "GLE", "GLA", "G-Class (G63)", "CLS", "EQE", "EQS", "Maybach", "B-Class", "GLB", "GLS", "SLK / SLC", "AMG GT"],
+            "بي إم دبليو": ["الفئة الأولى", "الفئة الثانية", "الفئة الثالثة (320i/330i/M340i)", "الفئة الرابعة", "الفئة الخامسة (520i/530i/540i)", "الفئة السادسة", "الفئة السابعة (730i/740i/750i)", "الفئة الثامنة", "X1", "X2", "X3", "X4", "X5", "X6", "X7", "XM", "Z4", "M2", "M3", "M4", "M5", "i4", "i7", "iX"],
+            "نيسان": ["صني N16", "صني N17", "قشقاي", "سنترا", "أكستريل", "باترول", "جوك", "ألتيما", "تيدا", "كيكس", "مكسيما", "بلوبيرد", "باثفايندر", "نافارا", "جي تي آر (GT-R)", "أريا"],
+            "كيا": ["سبورتاج", "سيراتو / جراند سيراتو", "سورينتو", "سيلتوس", "سونيت", "ريو", "بيكانتو", "K5 (أوبتيلما)", "كارنيفال", "إكس سيد", "سول", "كارينز", "ستينجر", "تيلورايد", "سييد", "بيجاس", "EV6", "EV9"],
+            "أودي": ["A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q5", "Q7", "Q8", "RS3", "RS6", "RS Q8", "e-tron", "TT", "R8"],
+            "فولكس فاجن": ["جولف", "باسات", "تيجوان", "توارق", "تي-روك", "جيتا", "تيرامونت", "ID.4", "ID.6", "بولو", "سيراكو", "أرتيون"],
+            "سكودا": ["أوكتافيا A4", "أوكتافيا A5", "أوكتافيا A7", "أوكتافيا A8", "كودياك", "كاروك", "كاميك", "سوبيرب", "فابيا", "سكالا", "رابيد", "كوشاك", "إينياك"],
+            "بيجو": ["208", "308", "508", "2008", "3008", "5008", "301", "408", "بارتنر"],
+            "رينو": ["ميجان", "داستر", "كادجار", "لوجان", "سانديرو", "سانديرو ستيب واي", "كابتشر", "أسترال", "ترافيك", "فلوانس", "كوليوس"],
+            "إم جي (MG)": ["MG ZS", "MG 5", "MG 6", "MG HS", "MG RX5", "MG4", "MG GT", "MG ONE", "MG ZS EV"],
+            "شيري": ["تيجو 2 برو", "تيجو 3", "تيجو 4 برو", "تيجو 7", "تيجو 7 برو", "تيجو 8", "تيجو 8 برو", "أريزو 5", "أريزو 6 برو"],
+            "شيفروليه": ["أوبترا", "أفيو", "كابتيفا", "تاهو", "سوبوربان", "سيلفرادو", "كروز", "ماليبو", "إيكوينوكس", "كامارو", "كورفيت", "لانوس", "ترافيرس"],
+            "ميتسوبيشي": ["لانسر بوما", "لانسر شارك (EX)", "إكليبس كروس", "باجيرو", "أتراج", "إكسباندر", "ميراج", "آوتلاندر"],
+            "سوزوكي": ["سويفت", "دزاير", "سيلريو", "إرتيجا", "فيتارا", "جيمني", "بالينو", "فرونكس", "جراند فيتارا", "ألتو"],
+            "فيات": ["تيبو", "500", "500X", "بونتو", "دوبلو", "شاهين", "128"],
+            "أخرى": ["موديل عام / غير مدرج"]
+        };
+
+        const initialCarsList = [
+            {
+                id: "car-101",
+                title: "تويوتا كورولا 2023 فبريكة بالكامل",
+                brand: "تويوتا",
+                model: "كورولا",
+                price: 920000,
+                year: 2023,
+                km: 18000,
+                condition: "مستعمل",
+                transmission: "أوتوماتيك",
+                city: "القاهرة",
+                badge: "لقطة",
+                image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800&q=80",
+                sellerName: "محمد أحمد",
+                sellerPhone: "01130282613",
+                description: "تويوتا كورولا الفئة الثانية، حالة الفبريكة بدون خربوش، صيانات توكيل منتظمة بالكامل مع الرخصة."
+            },
+            {
+                id: "car-102",
+                title: "هيونداي توسان 2022 Turbo الشكل الجديد",
+                brand: "هيونداي",
+                model: "توسان",
+                price: 1380000,
+                year: 2022,
+                km: 35000,
+                condition: "مستعمل",
+                transmission: "أوتوماتيك",
+                city: "الجيزة",
+                badge: "مميز",
+                image: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=800&q=80",
+                sellerName: "معرض النجم الذهبي",
+                sellerPhone: "01130282613",
+                description: "توسان أعلى فئة بانوراما، بصمة، شاشة، كاميرا 360، صيانات توكيل."
+            },
+            {
+                id: "car-103",
+                title: "بي إم دبليو M340i 2023 M-Performance",
+                brand: "بي إم دبليو",
+                model: "الفئة الثالثة (320i/330i/M340i)",
+                price: 3400000,
+                year: 2023,
+                km: 12000,
+                condition: "مستعمل",
+                transmission: "أوتوماتيك",
+                city: "القاهرة",
+                badge: "مميز",
+                image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80",
+                sellerName: "كابيتال موتورز",
+                sellerPhone: "01130282613",
+                description: "BMW M340i قوة 382 حصان دفع رباعي xDrive، جميع الكماليات، حماية كاملا بروتيكشن."
+            }
+        ];
+
+        let cars = [];
+        let favorites = [];
+        let currentUser = null;
+        let registeredUsersList = [];
+        let uploadedImageBase64List = [];
+        let currentShowingFavsOnly = false;
+        let selectedFilterModel = "";
+
+        window.onload = function () {
+            loadCarsFromStorage();
+            loadFavoritesFromStorage();
+            loadUserFromStorage();
+            loadAdminStateFromStorage();
+            loadRegisteredUsersFromStorage();
+            populateBrandDropdowns();
+            renderUserAuthHeader();
+            applyFilters();
+
+            document.addEventListener('click', function(e) {
+                const modelDropdown = document.getElementById('filterModelDropdown');
+                const modelInput = document.getElementById('filterModelInput');
+                if (modelDropdown && !modelDropdown.contains(e.target) && e.target !== modelInput) {
+                    modelDropdown.classList.add('hidden');
+                }
+            });
+        };
+
+        function loadCarsFromStorage() {
+            const saved = localStorage.getItem('souq_arabiyat_cars');
+            if (saved) {
+                try {
+                    cars = JSON.parse(saved);
+                } catch(e) {
+                    cars = [...initialCarsList];
+                }
+            } else {
+                cars = [...initialCarsList];
+                saveCarsToStorage();
+            }
+        }
+
+        function saveCarsToStorage() {
+            localStorage.setItem('souq_arabiyat_cars', JSON.stringify(cars));
+        }
+
+        function loadFavoritesFromStorage() {
+            const saved = localStorage.getItem('souq_arabiyat_favs');
+            if (saved) {
+                try {
+                    favorites = JSON.parse(saved);
+                } catch(e) {
+                    favorites = [];
+                }
+            } else {
+                favorites = [];
+            }
+            updateFavBadge();
+        }
+
+        function saveFavoritesToStorage() {
+            localStorage.setItem('souq_arabiyat_favs', JSON.stringify(favorites));
+            updateFavBadge();
+        }
+
+        function loadUserFromStorage() {
+            const saved = localStorage.getItem('souq_arabiyat_user');
+            if (saved) {
+                try {
+                    currentUser = JSON.parse(saved);
+                } catch(e) {
+                    currentUser = null;
+                }
+            }
+        }
+
+        function saveUserToStorage(userObj) {
+            currentUser = userObj;
+            localStorage.setItem('souq_arabiyat_user', JSON.stringify(userObj));
+            renderUserAuthHeader();
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            localStorage.removeItem('souq_arabiyat_user');
+            renderUserAuthHeader();
+            closeModal('userProfileModal');
+            showToast("تم تسجيل الخروج بنجاح.");
+        }
+
+        function loadRegisteredUsersFromStorage() {
+            const saved = localStorage.getItem('souq_arabiyat_users_list');
+            if (saved) {
+                try {
+                    registeredUsersList = JSON.parse(saved);
+                } catch(e) {
+                    registeredUsersList = [];
+                }
+            }
+        }
+
+        function saveRegisteredUsersToStorage() {
+            localStorage.setItem('souq_arabiyat_users_list', JSON.stringify(registeredUsersList));
+        }
+
+        function populateBrandDropdowns() {
+            const filterBrand = document.getElementById('filterBrand');
+            const addBrand = document.getElementById('addBrand');
+
+            filterBrand.innerHTML = '<option value="">جميع الماركات العالمية (الكل)</option>';
+            addBrand.innerHTML = '<option value="">اختر الماركة</option>';
+
+            Object.keys(globalBrandModelsMap).forEach(brand => {
+                const opt1 = document.createElement('option');
+                opt1.value = brand;
+                opt1.textContent = brand;
+                filterBrand.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = brand;
+                opt2.textContent = brand;
+                addBrand.appendChild(opt2);
+            });
+        }
+
+        function onBrandFilterChange() {
+            const brand = document.getElementById('filterBrand').value;
+            const modelInput = document.getElementById('filterModelInput');
+            const modelDropdown = document.getElementById('filterModelDropdown');
+            selectedFilterModel = "";
+
+            if (!brand || !globalBrandModelsMap[brand]) {
+                modelInput.value = "";
+                modelInput.placeholder = "اختر الماركة أولاً...";
+                modelInput.disabled = true;
+                modelDropdown.classList.add('hidden');
+            } else {
+                modelInput.value = "";
+                modelInput.placeholder = "اختر أو ابحث عن الموديل...";
+                modelInput.disabled = false;
+                populateModelDropdown(globalBrandModelsMap[brand]);
+            }
+            applyFilters();
+        }
+
+        function populateModelDropdown(models) {
+            const dropdown = document.getElementById('filterModelDropdown');
+            dropdown.innerHTML = "";
+
+            const allOpt = document.createElement('div');
+            allOpt.className = "px-4 py-2.5 hover:bg-gold-500/10 text-xs font-bold text-amber-400 cursor-pointer border-b border-gold-500/10";
+            allOpt.innerText = "جميع الموديلات";
+            allOpt.onclick = function() {
+                selectFilterModel("");
+            };
+            dropdown.appendChild(allOpt);
+
+            models.forEach(m => {
+                const item = document.createElement('div');
+                item.className = "px-4 py-2 text-xs font-bold text-slate-200 hover:bg-gold-500/10 hover:text-gold-400 cursor-pointer transition-colors border-b border-gold-500/5";
+                item.innerText = m;
+                item.onclick = function() {
+                    selectFilterModel(m);
+                };
+                dropdown.appendChild(item);
+            });
+        }
+
+        function showModelDropdown() {
+            const brand = document.getElementById('filterBrand').value;
+            if (brand && globalBrandModelsMap[brand]) {
+                document.getElementById('filterModelDropdown').classList.remove('hidden');
+            }
+        }
+
+        function filterModelDropdown() {
+            const brand = document.getElementById('filterBrand').value;
+            if (!brand || !globalBrandModelsMap[brand]) return;
+
+            const query = document.getElementById('filterModelInput').value.toLowerCase().trim();
+            const models = globalBrandModelsMap[brand].filter(m => m.toLowerCase().includes(query));
+            
+            populateModelDropdown(models);
+            document.getElementById('filterModelDropdown').classList.remove('hidden');
+        }
+
+        function selectFilterModel(m) {
+            selectedFilterModel = m;
+            const input = document.getElementById('filterModelInput');
+            input.value = m ? m : "جميع الموديلات";
+            document.getElementById('filterModelDropdown').classList.add('hidden');
+            applyFilters();
+        }
+
+        function onAddBrandChange() {
+            const brand = document.getElementById('addBrand').value;
+            const addModelSelect = document.getElementById('addModelSelect');
+            addModelSelect.innerHTML = '<option value="">اختر الموديل</option>';
+
+            if (brand && globalBrandModelsMap[brand]) {
+                globalBrandModelsMap[brand].forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = m;
+                    addModelSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function applyFilters() {
+            const searchVal = (document.getElementById('globalSearchInput').value || document.getElementById('mobileSearchInput').value || "").toLowerCase().trim();
+            const brandVal = document.getElementById('filterBrand').value;
+            const conditionVal = document.getElementById('filterCondition').value;
+            const maxPriceVal = parseFloat(document.getElementById('filterMaxPrice').value) || 0;
+            const transmissionVal = document.getElementById('filterTransmission').value;
+            const minYearVal = parseInt(document.getElementById('filterMinYear').value) || 0;
+            const sortByVal = document.getElementById('sortBy').value;
+
+            let filtered = cars.filter(car => {
+                if (currentShowingFavsOnly && !favorites.includes(car.id)) return false;
+
+                if (searchVal) {
+                    const q = searchVal;
+                    const matchTitle = car.title.toLowerCase().includes(q);
+                    const matchBrand = car.brand.toLowerCase().includes(q);
+                    const matchModel = car.model.toLowerCase().includes(q);
+                    const matchCity = car.city.toLowerCase().includes(q);
+                    if (!matchTitle && !matchBrand && !matchModel && !matchCity) return false;
+                }
+
+                if (brandVal && car.brand !== brandVal) return false;
+                if (selectedFilterModel && car.model !== selectedFilterModel) return false;
+                if (conditionVal && car.condition !== conditionVal) return false;
+                if (maxPriceVal > 0 && car.price > maxPriceVal) return false;
+                if (transmissionVal && car.transmission !== transmissionVal) return false;
+                if (minYearVal > 0 && car.year < minYearVal) return false;
+
+                return true;
+            });
+
+            if (sortByVal === 'priceLow') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortByVal === 'priceHigh') {
+                filtered.sort((a, b) => b.price - a.price);
+            } else if (sortByVal === 'yearNew') {
+                filtered.sort((a, b) => b.year - a.year);
+            }
+
+            renderCarsList(filtered);
+        }
+
+        function handleSearch() {
+            const val = document.getElementById('globalSearchInput').value;
+            document.getElementById('mobileSearchInput').value = val;
+            applyFilters();
+        }
+
+        function handleMobileSearch() {
+            const val = document.getElementById('mobileSearchInput').value;
+            document.getElementById('globalSearchInput').value = val;
+            applyFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('globalSearchInput').value = "";
+            document.getElementById('mobileSearchInput').value = "";
+            document.getElementById('filterBrand').value = "";
+            document.getElementById('filterCondition').value = "";
+            document.getElementById('filterMaxPrice').value = "";
+            document.getElementById('filterTransmission').value = "";
+            document.getElementById('filterMinYear').value = "";
+            document.getElementById('sortBy').value = "newest";
+            
+            selectedFilterModel = "";
+            const modelInput = document.getElementById('filterModelInput');
+            modelInput.value = "";
+            modelInput.placeholder = "اختر الماركة أولاً...";
+            modelInput.disabled = true;
+
+            currentShowingFavsOnly = false;
+            document.getElementById('sectionTitle').innerText = "أحدث السيارات المعروضة";
+
+            applyFilters();
+        }
+
+        function renderCarsList(list) {
+            const grid = document.getElementById('carsGrid');
+            const emptyState = document.getElementById('emptyState');
+            const countText = document.getElementById('carCountText');
+
+            grid.innerHTML = "";
+
+            if (list.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                countText.innerText = "لا يوجد سيارات متاحة بهذه الخيارات";
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            countText.innerText = `تم العثور على ${list.length} سيارة متاحة`;
+
+            list.forEach(car => {
+                const isFav = favorites.includes(car.id);
+                const isOwner = currentUser && (car.sellerPhone === currentUser.phone || car.sellerName === currentUser.name);
+
+                const card = document.createElement('div');
+                card.className = "bg-darkbg-card rounded-3xl overflow-hidden border border-gold-500/20 hover:border-gold-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group hover:-translate-y-1";
+
+                card.innerHTML = `
+                    <div>
+                        <div class="relative overflow-hidden h-52 bg-darkbg-950">
+                            <img src="${car.image}" alt="${car.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            
+                            <div class="absolute top-3 right-3 flex flex-col gap-1 z-10">
+                                ${car.badge ? `<span class="bg-gradient-to-r from-gold-500 to-gold-600 text-black text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-amber-200/30">${car.badge}</span>` : ''}
+                                <span class="bg-black/80 backdrop-blur-md text-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-full border border-gold-500/20">${car.condition}</span>
+                            </div>
+
+                            <div class="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+                                <button onclick="shareCarListing(event, '${car.id}')" title="مشاركة الإعلان" class="w-9 h-9 rounded-full bg-black/60 backdrop-blur-md text-slate-300 hover:text-gold-400 hover:bg-black flex items-center justify-center transition-all border border-gold-500/20">
+                                    <i class="fa-solid fa-share-nodes text-xs"></i>
+                                </button>
+                                <button onclick="toggleFavorite(event, '${car.id}')" title="المفضلة" class="w-9 h-9 rounded-full bg-black/60 backdrop-blur-md text-slate-300 hover:text-rose-500 hover:bg-black flex items-center justify-center transition-all border border-gold-500/20">
+                                    <i class="fa-${isFav ? 'solid text-rose-500' : 'regular'} fa-heart text-sm"></i>
+                                </button>
+                            </div>
+
+                            <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-slate-200 text-xs px-3 py-1 rounded-xl border border-gold-500/20 font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-location-dot text-gold-500"></i>
+                                <span>${car.city}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-base font-black text-white group-hover:text-gold-400 transition-colors line-clamp-1">${car.title}</h3>
+                            </div>
+
+                            <div class="text-xl font-black text-gold-400 mb-4 font-mono">
+                                ${car.price.toLocaleString('ar-EG')} <span class="text-xs font-normal text-slate-400">ج.م</span>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 py-3 border-y border-gold-500/10 text-[11px] text-slate-300 mb-4 bg-darkbg-950/50 rounded-2xl px-2 text-center">
+                                <div class="flex flex-col items-center gap-1">
+                                    <i class="fa-solid fa-calendar text-gold-500/80"></i>
+                                    <span class="font-bold">${car.year}</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1 border-x border-gold-500/10">
+                                    <i class="fa-solid fa-gauge-high text-gold-500/80"></i>
+                                    <span class="font-bold">${car.km.toLocaleString('ar-EG')} كم</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1">
+                                    <i class="fa-solid fa-gears text-gold-500/80"></i>
+                                    <span class="font-bold">${car.transmission}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-5 pb-5 flex gap-2">
+                        <button onclick="openCarDetailModal('${car.id}')" class="flex-1 bg-darkbg-950 hover:bg-gold-500/10 text-gold-400 hover:text-gold-300 font-bold py-2.5 rounded-2xl border border-gold-500/30 transition-all text-xs flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-circle-info"></i> التفاصيل
+                        </button>
+
+                        <a href="https://wa.me/2${car.sellerPhone || ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent('السلام عليكم، بخصوص سيارة: ' + car.title + ' المعروضة على منصة سوق العربيات')}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-2xl shadow-lg shadow-emerald-600/20 transition-all text-xs flex items-center justify-center gap-1.5">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> تواصل
+                        </a>
+
+                        ${(isOwner || isAdminLoggedIn) ? `
+                            <button onclick="openEditCarModal('${car.id}')" title="تعديل الإعلان" class="bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-black border border-amber-500/30 px-3 rounded-2xl transition-all">
+                                <i class="fa-solid fa-pen-to-square text-xs"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function openCarDetailModal(carId) {
+            const car = cars.find(c => c.id === carId);
+            if (!car) return;
+
+            const modalContent = document.getElementById('carModalContent');
+            const galleryImages = (car.gallery && car.gallery.length > 0) ? car.gallery : [car.image];
+
+            modalContent.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 sm:p-8">
+                    <div>
+                        <div class="rounded-2xl overflow-hidden h-72 bg-darkbg-950 border border-gold-500/20 mb-3 relative">
+                            <img id="mainDetailImage" src="${galleryImages[0]}" class="w-full h-full object-cover">
+                        </div>
+
+                        ${galleryImages.length > 1 ? `
+                            <div class="flex gap-2 overflow-x-auto pb-2">
+                                ${galleryImages.map((imgUrl, idx) => `
+                                    <img src="${imgUrl}" onclick="document.getElementById('mainDetailImage').src='${imgUrl}'" class="w-20 h-16 object-cover rounded-xl border border-gold-500/20 cursor-pointer hover:border-gold-500 transition-all">
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-gold-500/10 text-gold-400 rounded-full text-xs font-bold mb-3 border border-gold-500/30">
+                                <span>${car.brand}</span> • <span>${car.model}</span>
+                            </div>
+
+                            <h2 class="text-2xl font-black text-white mb-2 leading-tight">${car.title}</h2>
+                            
+                            <div class="text-3xl font-black text-gold-400 font-mono mb-6">
+                                ${car.price.toLocaleString('ar-EG')} <span class="text-sm font-normal text-slate-400">جنيه مصري</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 mb-6 bg-darkbg-950 p-4 rounded-2xl border border-gold-500/20 text-xs">
+                                <div><span class="text-slate-400">سنة الصنع:</span> <strong class="text-white ml-1">${car.year}</strong></div>
+                                <div><span class="text-slate-400">الكيلومترات:</span> <strong class="text-white ml-1">${car.km.toLocaleString('ar-EG')} كم</strong></div>
+                                <div><span class="text-slate-400">حالة السيارة:</span> <strong class="text-white ml-1">${car.condition}</strong></div>
+                                <div><span class="text-slate-400">ناقل الحركة:</span> <strong class="text-white ml-1">${car.transmission}</strong></div>
+                                <div><span class="text-slate-400">المحافظة:</span> <strong class="text-white ml-1">${car.city}</strong></div>
+                                <div><span class="text-slate-400">البائع:</span> <strong class="text-gold-400 ml-1">${car.sellerName || 'البائع'}</strong></div>
+                            </div>
+
+                            <div class="mb-6">
+                                <h4 class="text-xs font-bold text-amber-300 mb-2">وصف وتفاصيل السيارة:</h4>
+                                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed bg-darkbg-950/60 p-4 rounded-2xl border border-gold-500/10">${car.description || 'لا يوجد وصف إضافي لهذه السيارة.'}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 pt-4 border-t border-gold-500/20">
+                            <a href="https://wa.me/2${car.sellerPhone || ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent('السلام عليكم، أرغب في الاستفسار عن السيارة: ' + car.title + ' بسعر ' + car.price.toLocaleString('ar-EG') + ' ج.م')}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl shadow-lg shadow-emerald-600/20 transition-all text-xs sm:text-sm flex items-center justify-center gap-2">
+                                <i class="fa-brands fa-whatsapp text-lg"></i>
+                                <span>تواصل عبر الواتساب</span>
+                            </a>
+                            <a href="tel:${car.sellerPhone || ADMIN_WHATSAPP_NUMBER}" class="bg-darkbg-950 hover:bg-gold-500 hover:text-black text-gold-400 font-black px-5 py-3 rounded-xl border border-gold-500/30 transition-all text-xs sm:text-sm flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-phone"></i>
+                                <span>اتصال</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('carDetailModal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function toggleFavorite(e, carId) {
+            if (e) e.stopPropagation();
+
+            const index = favorites.indexOf(carId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                showToast("تمت الإزالة من المفضلة");
+            } else {
+                favorites.push(carId);
+                showToast("تمت الإضافة للمفضلة ❤️");
+            }
+
+            saveFavoritesToStorage();
+            applyFilters();
+        }
+
+        function toggleFavoritesView() {
+            currentShowingFavsOnly = !currentShowingFavsOnly;
+            const btn = document.getElementById('favToggleBtn');
+
+            if (currentShowingFavsOnly) {
+                btn.classList.add('border-rose-500', 'bg-rose-500/20');
+                document.getElementById('sectionTitle').innerText = "سياراتك المفضلة ❤️";
+            } else {
+                btn.classList.remove('border-rose-500', 'bg-rose-500/20');
+                document.getElementById('sectionTitle').innerText = "أحدث السيارات المعروضة";
+            }
+
+            applyFilters();
+        }
+
+        function updateFavBadge() {
+            const badge = document.getElementById('favCountBadge');
+            if (favorites.length > 0) {
+                badge.innerText = favorites.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function requireAuthOrExecute(callback) {
+            if (!currentUser) {
+                openAuthModal('register');
+            } else {
+                callback();
+            }
+        }
+
+        function openAuthModal(tab) {
+            switchAuthTab(tab);
+            document.getElementById('authModal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function switchAuthTab(tab) {
+            const regBtn = document.getElementById('tabRegisterBtn');
+            const loginBtn = document.getElementById('tabLoginBtn');
+            const regForm = document.getElementById('registerForm');
+            const loginForm = document.getElementById('loginForm');
+
+            if (tab === 'register') {
+                regBtn.className = "flex-1 py-3 text-center font-bold text-sm border-b-2 border-gold-500 text-gold-400 flex items-center justify-center gap-2";
+                loginBtn.className = "flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2";
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            } else {
+                loginBtn.className = "flex-1 py-3 text-center font-bold text-sm border-b-2 border-gold-500 text-gold-400 flex items-center justify-center gap-2";
+                regBtn.className = "flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2";
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.classList.remove('modal-active');
+        }
+
+        function setQuickBrandFilter(brand) {
+            document.getElementById('filterBrand').value = brand;
+            onBrandFilterChange();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Share Car Functionality
+        function shareCarListing(e, carId) {
+            if(e) e.stopPropagation();
+            const car = cars.find(c => c.id === carId);
+            if (!car) return;
+
+            const shareData = {
+                title: car.title,
+                text: `شاهد سيارة ${car.title} بسعر ${car.price.toLocaleString('ar-EG')} ج.م على منصة سوق العربيات!`,
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(() => {
+                    copyToClipboard(shareData.text);
+                });
+            } else {
+                copyToClipboard(shareData.text);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("تم نسخ تفاصيل ورابط الإعلان للحافظة بنجاح 📋");
+            }).catch(() => {
+                showToast("تعذر النسخ تلقائياً!");
+            });
+        }
+
+        // Edit Car Functionality
+        function openEditCarModal(carId) {
+            const car = cars.find(c => c.id === carId);
+            if (!car) return;
+
+            document.getElementById('editCarId').value = car.id;
+            document.getElementById('editTitle').value = car.title;
+            document.getElementById('editPrice').value = car.price;
+            document.getElementById('editCity').value = car.city;
+            document.getElementById('editYear').value = car.year;
+            document.getElementById('editKm').value = car.km;
+            document.getElementById('editImage').value = car.image;
+            document.getElementById('editDescription').value = car.description || '';
+
+            document.getElementById('editCarModal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function handleEditCarSubmit(e) {
+            e.preventDefault();
+            const carId = document.getElementById('editCarId').value;
+            const carIndex = cars.findIndex(c => c.id === carId);
+
+            if (carIndex > -1) {
+                cars[carIndex].title = document.getElementById('editTitle').value;
+                cars[carIndex].price = parseInt(document.getElementById('editPrice').value);
+                cars[carIndex].city = document.getElementById('editCity').value;
+                cars[carIndex].year = parseInt(document.getElementById('editYear').value);
+                cars[carIndex].km = parseInt(document.getElementById('editKm').value);
+                cars[carIndex].image = document.getElementById('editImage').value || cars[carIndex].image;
+                cars[carIndex].description = document.getElementById('editDescription').value;
+
+                saveCarsToStorage();
+                closeModal('editCarModal');
+                showToast("تم حفظ وتعديل كافة بيانات الإعلان بنجاح ✨");
+                applyFilters();
+                if (!document.getElementById('adminDashboardModal').classList.contains('hidden')) {
+                    openAdminDashboardModal();
+                }
+            }
+        }
+
+        // Admin Functions
+        function updateAdminUI() {
+            const ribbon = document.getElementById('adminRibbon');
+            if (isAdminLoggedIn) {
+                ribbon.classList.remove('hidden');
+            } else {
+                ribbon.classList.add('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            saveAdminStateToStorage();
+            updateAdminUI();
+            showToast("تم خروج الأدمن والعودة للوضع العادي.");
+            applyFilters();
+        }
+
+        function openAdminDashboardModal() {
+            const container = document.getElementById('adminCarsListContainer');
+            container.innerHTML = '';
+
+            if (cars.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-slate-500">لا توجد سيارات معروضة على المنصة حالياً.</div>`;
+            } else {
+                cars.forEach(car => {
+                    const row = document.createElement('div');
+                    row.className = "bg-darkbg-950 rounded-2xl p-4 border border-gold-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4";
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <img src="${car.image}" class="w-20 h-16 object-cover rounded-xl border border-gold-500/20">
+                            <div>
+                                <h4 class="font-bold text-white text-sm">${car.title}</h4>
+                                <p class="text-xs text-gold-400 mt-0.5">${car.price.toLocaleString('ar-EG')} ج.م • ${car.city} • البائع: ${car.sellerName}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button onclick="openEditCarModal('${car.id}')" class="bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-black border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1">
+                                <i class="fa-solid fa-pen-to-square"></i> تعديل
+                            </button>
+                            <button onclick="adminDeleteCar('${car.id}')" class="bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1">
+                                <i class="fa-solid fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+
+            document.getElementById('adminDashboardModal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function adminDeleteCar(carId) {
+            cars = cars.filter(c => c.id !== carId);
+            saveCarsToStorage();
+            showToast("تم حذف السيارة بنجاح بواسطة الأدمن!");
+            openAdminDashboardModal();
+            applyFilters();
+        }
+
+        function loadAdminStateFromStorage() {
+            const state = localStorage.getItem('souq_arabiyat_admin_active');
+            isAdminLoggedIn = (state === 'true');
+            updateAdminUI();
+        }
+
+        function saveAdminStateToStorage() {
+            localStorage.setItem('souq_arabiyat_admin_active', isAdminLoggedIn ? 'true' : 'false');
+        }
+
+        function checkPasswordStrength() {
+            const pass = document.getElementById('regPass').value;
+            const bar = document.getElementById('strengthBar');
+            const text = document.getElementById('strengthText');
+
+            if (!pass) {
+                bar.style.width = '0%';
+                text.innerText = 'لم تُدخل بعد';
+                text.className = 'font-bold text-slate-500';
+                return;
+            }
+
+            let score = 0;
+            if (pass.length >= 8) score++;
+            if (/[A-Z]/.test(pass) || /[a-z]/.test(pass)) score++;
+            if (/[0-9]/.test(pass)) score++;
+            if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+            if (score <= 1) {
+                bar.style.width = '30%';
+                bar.className = 'h-full transition-all duration-300 bg-rose-500';
+                text.innerText = 'ضعيفة (أدخل 8 أحرف على الأقل)';
+                text.className = 'font-bold text-rose-400';
+            } else if (score === 2 || score === 3) {
+                bar.style.width = '65%';
+                bar.className = 'h-full transition-all duration-300 bg-amber-500';
+                text.innerText = 'متوسطة الأمان';
+                text.className = 'font-bold text-amber-400';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'h-full transition-all duration-300 bg-emerald-500';
+                text.innerText = 'قوية جداً 🛡️';
+                text.className = 'font-bold text-emerald-400';
+            }
+            validatePasswordMatch();
+        }
+
+        function validatePasswordMatch() {
+            const pass = document.getElementById('regPass').value;
+            const confirmPass = document.getElementById('regPassConfirm').value;
+            const confirmInput = document.getElementById('regPassConfirm');
+            const msg = document.getElementById('passMatchMessage');
+
+            if (!confirmPass) {
+                msg.classList.add('hidden');
+                confirmInput.style.borderColor = "rgba(245, 158, 11, 0.3)";
+                return false;
+            }
+
+            if (pass !== confirmPass) {
+                msg.innerText = '⚠️ كلمتا المرور غير متطابقتين!';
+                msg.className = 'text-[11px] font-bold text-rose-400 mt-1 block';
+                confirmInput.style.borderColor = "#f43f5e";
+                return false;
+            } else {
+                msg.innerText = '✓ كلمتا المرور متطابقتان تماماً';
+                msg.className = 'text-[11px] font-bold text-emerald-400 mt-1 block';
+                confirmInput.style.borderColor = "#10b981";
+                return true;
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash text-sm text-gold-400';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye text-sm text-slate-400';
+            }
+        }
+
+        function updateAccountTypeUI(type) {
+            const userLabel = document.getElementById('accountTypeUserLabel');
+            const dealerLabel = document.getElementById('accountTypeDealerLabel');
+            const nameLabel = document.getElementById('regNameLabel');
+            const nameInput = document.getElementById('regName');
+
+            if (type === 'فرد') {
+                userLabel.className = "cursor-pointer border-2 border-gold-500 bg-gold-500/10 p-3 rounded-2xl flex items-center gap-2.5 transition-all";
+                dealerLabel.className = "cursor-pointer border-2 border-gold-500/20 bg-darkbg-950 p-3 rounded-2xl flex items-center gap-2.5 transition-all";
+                nameLabel.innerHTML = `<i class="fa-solid fa-id-card text-gold-500 ml-1"></i> الاسم بالكامل`;
+                nameInput.placeholder = "مثال: محمد أحمد";
+            } else {
+                dealerLabel.className = "cursor-pointer border-2 border-gold-500 bg-gold-500/10 p-3 rounded-2xl flex items-center gap-2.5 transition-all";
+                userLabel.className = "cursor-pointer border-2 border-gold-500/20 bg-darkbg-950 p-3 rounded-2xl flex items-center gap-2.5 transition-all";
+                nameLabel.innerHTML = `<i class="fa-solid fa-building-user text-gold-500 ml-1"></i> اسم المعرض / الشركة`;
+                nameInput.placeholder = "مثال: معرض النجم الذهبي للسيارات";
+            }
+        }
+
+        function handleRegisterSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const phone = document.getElementById('regPhone').value.trim();
+            const city = document.getElementById('regCity').value;
+            const pass = document.getElementById('regPass').value;
+            const confirmPass = document.getElementById('regPassConfirm').value;
+            const accountType = document.querySelector('input[name="accountType"]:checked').value;
+
+            if (pass.length < 8) {
+                showToast("كلمة المرور يجب أن لا تقل عن 8 أحرف!");
+                return;
+            }
+
+            if (pass !== confirmPass) {
+                showToast("كلمتا المرور غير متطابقتين!");
+                return;
+            }
+
+            const phoneRegex = /^01[0125][0-9]{8}$/;
+            if (!phoneRegex.test(phone)) {
+                showToast("يرجى إدخال رقم هاتف محمول صحيح!");
+                return;
+            }
+
+            const existing = registeredUsersList.find(u => u.email.toLowerCase() === email);
+            if (existing) {
+                showToast("هذا البريد مسجل بالفعل!");
+                switchAuthTab('login');
+                document.getElementById('loginEmail').value = email;
+                return;
+            }
+
+            const newUser = {
+                name: name,
+                email: email,
+                phone: phone,
+                city: city || 'القاهرة',
+                accountType: accountType,
+                pass: pass,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            registeredUsersList.push(newUser);
+            saveRegisteredUsersToStorage();
+            saveUserToStorage(newUser);
+
+            closeModal('authModal');
+            showToast(`تم إنشاء حسابك بنجاح! أهلاً بك يا ${newUser.name} 🎉`);
+            openUserProfileModal();
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+
+            if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+                isAdminLoggedIn = true;
+                saveAdminStateToStorage();
+                
+                const adminUser = {
+                    name: "محمد (الأدمن)",
+                    email: ADMIN_EMAIL,
+                    phone: "01130282613",
+                    city: "القاهرة",
+                    accountType: "مدير المنصة (الأدمن)",
+                    date: new Date().toISOString().split('T')[0]
+                };
+                saveUserToStorage(adminUser);
+
+                closeModal('authModal');
+                updateAdminUI();
+                showToast("أهلاً بك يا محمد! تم تسجيل الدخول كـ أدمن وتفعيل صلاحيات التحكم 👑");
+                applyFilters();
+                return;
+            }
+
+            const existing = registeredUsersList.find(u => u.email.toLowerCase() === email);
+
+            if (!existing) {
+                showToast("هذا البريد غير مسجل!");
+                switchAuthTab('register');
+                document.getElementById('regEmail').value = email;
+                return;
+            }
+
+            if (existing.pass && existing.pass !== pass) {
+                showToast("كلمة المرور غير صحيحة!");
+                return;
+            }
+
+            saveUserToStorage(existing);
+            closeModal('authModal');
+            showToast(`أهلاً بك مجدداً ${existing.name}!`);
+            openUserProfileModal();
+        }
+
+        function triggerGoogleOAuth() {
+            openOAuthDialog('Google', 'fa-brands fa-google text-rose-500 border-rose-500/30 bg-rose-500/10', [
+                { name: 'محمد أحمد (الحساب الشخصي)', email: 'mouhamed.official@gmail.com' },
+                { name: 'م/ محمد (حساب الأعمال)', email: 'mouhamed.auto@gmail.com' }
+            ]);
+        }
+
+        function triggerFacebookOAuth() {
+            openOAuthDialog('Facebook', 'fa-brands fa-facebook text-blue-500 border-blue-500/30 bg-blue-500/10', [
+                { name: 'Mouhamed Ahmed', email: 'mouhamed_fb_user@facebook.com' }
+            ]);
+        }
+
+        function openOAuthDialog(provider, iconClasses, mockAccounts) {
+            closeModal('authModal');
+
+            const headerIcon = document.getElementById('oauthHeaderIcon');
+            headerIcon.className = `w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl ${iconClasses}`;
+            headerIcon.innerHTML = `<i class="${iconClasses.split(' ')[0]} ${iconClasses.split(' ')[1]}"></i>`;
+
+            document.getElementById('oauthProviderTitle').innerText = `تسجيل الدخول عبر ${provider}`;
+
+            const listContainer = document.getElementById('oauthAccountsList');
+            listContainer.innerHTML = '';
+
+            mockAccounts.forEach(acc => {
+                const btn = document.createElement('div');
+                btn.className = "flex items-center gap-3 p-3 bg-darkbg-950 hover:bg-gold-500/10 rounded-2xl border border-gold-500/20 cursor-pointer transition-all text-right";
+                btn.onclick = function() { completeOAuthLogin(acc.name, acc.email, provider); };
+                btn.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl bg-gold-500 text-black font-black flex items-center justify-center text-sm shadow-md">
+                        ${acc.name.charAt(0)}
+                    </div>
+                    <div>
+                        <span class="block text-xs font-bold text-white">${acc.name}</span>
+                        <span class="block text-[10px] text-slate-400">${acc.email}</span>
+                    </div>
+                `;
+                listContainer.appendChild(btn);
+            });
+
+            document.getElementById('oauthModal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function completeOAuthLogin(name, email, provider) {
+            const newUserRecord = {
+                name: name,
+                email: email,
+                phone: "01130282613",
+                city: "القاهرة",
+                accountType: "فرد",
+                pass: "oauth_connected",
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            const existing = registeredUsersList.find(u => u.email === email);
+            if (!existing) {
+                registeredUsersList.push(newUserRecord);
+                saveRegisteredUsersToStorage();
+            }
+
+            const activeUser = existing || newUserRecord;
+            saveUserToStorage(activeUser);
+
+            closeModal('oauthModal');
+            showToast(`تم الربط والتسجيل بـ ${provider} بنجاح!`);
+            openUserProfileModal();
+        }
+
+        function renderUserAuthHeader() {
+            const container = document.getElementById('userAuthSection');
+            if (currentUser) {
+                container.innerHTML = `
+                    <div onclick="openUserProfileModal()" class="flex items-center gap-2 cursor-pointer hover:bg-gold-500/10 p-1.5 rounded-2xl transition-all border border-gold-500/30">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 text-black font-black flex items-center justify-center text-sm shadow-md">
+                            ${currentUser.name ? currentUser.name.charAt(0) : 'U'}
+                        </div>
+                        <div class="hidden lg:block text-right">
+                            <span class="block text-xs font-bold text-white leading-tight line-clamp-1">${currentUser.name}</span>
+                            <span class="block text-[10px] text-gold-400 font-semibold">${currentUser.accountType || 'حساب مفعل'}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal('login')" class="text-xs font-bold text-slate-300 hover:text-gold-400 px-3 py-2 rounded-xl transition-all border border-gold-500/20 hover:border-gold-500/40">
+                        تسجيل الدخول
+                    </button>
+                `;
+            }
+        }
+
+        function openUserProfileModal() {
+            if (!currentUser) {
+                openAuthModal('login');
+                return;
+            }
+
+            const content = document.getElementById('userProfileModalContent');
+            const myCars = cars.filter(c => c.sellerPhone === currentUser.phone || c.sellerName === currentUser.name);
+
+            content.innerHTML = `
+                <div class="flex items-center gap-4 pb-6 border-b border-gold-500/20 mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-400 to-gold-600 text-black font-black text-2xl flex items-center justify-center shadow-lg">
+                        ${currentUser.name ? currentUser.name.charAt(0) : 'U'}
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-white">${currentUser.name}</h3>
+                        <p class="text-xs text-gold-400 font-semibold mt-0.5">${currentUser.accountType} • ${currentUser.city || 'مصر'}</p>
+                        <p class="text-[11px] text-slate-400 mt-1"><i class="fa-solid fa-envelope ml-1 text-gold-500"></i>${currentUser.email} | <i class="fa-solid fa-phone ml-1 text-gold-500"></i>${currentUser.phone}</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-sm font-bold text-white"><i class="fa-solid fa-car ml-1 text-gold-500"></i> إعلاناتي المعروضة (${myCars.length})</h4>
+                    <button onclick="closeModal('userProfileModal'); openAddCarModal();" class="bg-gold-500/10 hover:bg-gold-500 text-gold-400 hover:text-black border border-gold-500/30 px-3 py-1.5 rounded-xl text-xs font-bold transition-all">
+                        + إضافة سيارة جديدة
+                    </button>
+                </div>
+
+                <div class="space-y-3 max-h-60 overflow-y-auto pr-1 mb-6">
+                    ${myCars.length === 0 ? `
+                        <div class="text-center py-6 bg-darkbg-950 rounded-2xl border border-gold-500/10 text-xs text-slate-400">
+                            لم تقم بإضافة أي سيارة للبيع بعد.
+                        </div>
+                    ` : myCars.map(car => `
+                        <div class="bg-darkbg-950 p-3 rounded-2xl border border-gold-500/20 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <img src="${car.image}" class="w-16 h-12 object-cover rounded-xl border border-gold-500/20">
+                                <div>
+                                    <h5 class="text-xs font-bold text-white">${car.title}</h5>
+                                    <span class="text-[11px] text-gold-400 font-mono">${car.price.toLocaleString('ar-EG')} ج.م</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="closeModal('userProfileModal'); openEditCarModal('${car.id}');" class="p-2 bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black rounded-xl text-xs transition-all border border-amber-500/20">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="deleteUserCar('${car.id}')" class="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all border border-rose-500/20">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="pt-4 border-t border-gold-500/20 flex justify-between items-center">
+                    <button onclick="logoutUser()" class="bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white font-bold px-4 py-2 rounded-xl text-xs transition-all border border-rose-500/30 flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                    <button onclick="closeModal('userProfileModal')" class="bg-darkbg-950 hover:bg-slate-800 text-slate-300 font-bold px-4 py-2 rounded-xl text-xs transition-all border border-gold-500/20">
+                        إغلاق
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('userProfileModal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function deleteUserCar(carId) {
+            cars = cars.filter(c => c.id !== carId);
+            saveCarsToStorage();
+            showToast("تم حذف إعلان السيارة بنجاح.");
+            openUserProfileModal();
+            applyFilters();
+        }
+
+        function openAddCarModal() {
+            uploadedImageBase64List = [];
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('addCarForm').reset();
+
+            const badge = document.getElementById('addModalBadge');
+            const subtext = document.getElementById('addModalSubtext');
+            const btnIcon = document.getElementById('addSubmitBtnIcon');
+            const btnText = document.getElementById('addSubmitBtnText');
+
+            if (isAdminLoggedIn) {
+                badge.className = "inline-flex items-center gap-2 px-3 py-1 bg-gold-500/10 text-gold-400 rounded-full text-xs font-bold mb-2 border border-gold-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-crown"></i> نشر مباشر (بصلاحيات الأدمن)`;
+                subtext.innerText = "سيتم نشر السيارة مباشرة في الموقع وبدون الحاجة لإعادة التوجيه إلى الواتساب.";
+                btnIcon.className = "fa-solid fa-rocket text-lg";
+                btnText.innerText = "نشر الإعلان فوراً بالموقع";
+            } else {
+                badge.className = "inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold mb-2 border border-emerald-500/30";
+                badge.innerHTML = `<i class="fa-brands fa-whatsapp"></i> رفع عبر الواتساب المباشر`;
+                subtext.innerText = "أدخل التفاصيل وسيتم تحويلك تلقائياً للواتساب المباشر لنشر إعلانك لدى الإدارة.";
+                btnIcon.className = "fa-brands fa-whatsapp text-lg";
+                btnText.innerText = "إرسال وإتمام النشر عبر الواتساب";
+            }
+
+            document.getElementById('addCarModal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function previewUploadedImages(event) {
+            const files = event.target.files;
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = '';
+            uploadedImageBase64List = [];
+
+            if (files && files.length > 0) {
+                container.classList.remove('hidden');
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImageBase64List.push(e.target.result);
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = "w-20 h-16 object-cover rounded-xl border border-gold-500/30 shadow-md";
+                        container.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        function handleAddCarSubmit(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('addTitle').value.trim();
+            const brand = document.getElementById('addBrand').value;
+            const model = document.getElementById('addModelSelect').value;
+            const price = parseInt(document.getElementById('addPrice').value);
+            const city = document.getElementById('addCity').value.trim();
+            const year = parseInt(document.getElementById('addYear').value);
+            const km = parseInt(document.getElementById('addKm').value);
+            const condition = document.getElementById('addCondition').value;
+            const transmission = document.getElementById('addTransmission').value;
+            const badge = document.getElementById('addBadge').value;
+            const description = document.getElementById('addDescription').value.trim();
+
+            const defaultImage = "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80";
+            const mainImg = uploadedImageBase64List.length > 0 ? uploadedImageBase64List[0] : defaultImage;
+
+            const newCar = {
+                id: "car-" + Date.now(),
+                title: title,
+                brand: brand,
+                model: model,
+                price: price,
+                year: year,
+                km: km,
+                condition: condition,
+                transmission: transmission,
+                city: city,
+                badge: badge,
+                image: mainImg,
+                gallery: uploadedImageBase64List.length > 0 ? uploadedImageBase64List : [defaultImage],
+                sellerName: currentUser ? currentUser.name : "مستخدم سوق العربيات",
+                sellerPhone: currentUser ? currentUser.phone : "01130282613",
+                description: description
+            };
+
+            cars.unshift(newCar);
+            saveCarsToStorage();
+
+            closeModal('addCarModal');
+
+            if (isAdminLoggedIn) {
+                showToast("تم نشر السيارة بنجاح على المنصة 🎉");
+                applyFilters();
+            } else {
+                const message = `السلام عليكم، أرغب في نشر إعلان سيارة جديدة على منصة سوق العربيات:
+
+🚗 *العنوان:* ${title}
+🏷️ *الماركة والموديل:* ${brand} - ${model}
+💰 *السعر:* ${price.toLocaleString('ar-EG')} ج.م
+📍 *المحافظة:* ${city}
+📅 *سنة الصنع:* ${year}
+🛣️ *الكيلومترات:* ${km.toLocaleString('ar-EG')} كم
+⚙️ *ناقل الحركة:* ${transmission}
+✨ *الحالة:* ${condition}
+👤 *اسم البائع:* ${newCar.sellerName}
+📞 *رقم التواصل:* ${newCar.sellerPhone}
+📝 *التفاصيل:* ${description || 'بدون تفاصيل إضافية'}`;
+
+                const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+                showToast("جاري تحويلك للواتساب لإتمام نشر الإعلان مع إدارة المنصة...");
+                applyFilters();
+            }
+        }
+    </script>
+</body>
+</html>
